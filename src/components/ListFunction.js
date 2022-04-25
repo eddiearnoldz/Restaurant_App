@@ -2,35 +2,61 @@ import { useEffect, useState } from "react";
 
 function ListFunction() {
   const [ restaurants, setRestaurants] = useState([])
+  const [city, setCity] = useState("")
+  const encodedParamsRestaurant = new URLSearchParams();
+    encodedParamsRestaurant.append("language", "en_US");
+    encodedParamsRestaurant.append("limit", "5");
+    encodedParamsRestaurant.append("location_id", "297704");
+    encodedParamsRestaurant.append("currency", "USD");
 
-  useEffect(() => {
-    const encodedParams = new URLSearchParams();
-    encodedParams.append("language", "en_US");
-    encodedParams.append("limit", "30");
-    encodedParams.append("location_id", "297704");
-    encodedParams.append("currency", "USD");
+  const encodedParamsCity = new URLSearchParams();
+    encodedParamsCity.append("q", "lon");
+    encodedParamsCity.append("language", "en_US");
     
-    const url = 'https://worldwide-restaurants.p.rapidapi.com/search';
+    const urlRestaurant = 'https://worldwide-restaurants.p.rapidapi.com/search';
+    const urlCity = 'https://worldwide-restaurants.p.rapidapi.com/typeahead';
     
-    const options = {
+    const optionsRestaurant = {
       method: 'POST',
       headers: {
         'content-type': 'application/x-www-form-urlencoded',
         'X-RapidAPI-Host': 'worldwide-restaurants.p.rapidapi.com',
         'X-RapidAPI-Key': '0791fd2251msh1059b7a80f03df0p1b3d34jsna52ad818afbc'
       },
-      body: encodedParams
+      body: encodedParamsRestaurant
+    };
+
+    const optionsCity = {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded',
+        'X-RapidAPI-Host': 'worldwide-restaurants.p.rapidapi.com',
+        'X-RapidAPI-Key': '0791fd2251msh1059b7a80f03df0p1b3d34jsna52ad818afbc'
+      },
+      body: encodedParamsCity
     };
     
-    const fetchData = async () => {
-      await fetch(url, options)
-      .then(res => res.json())
-      .then((json) => {console.log(json); setRestaurants(json.results.data)})
-      .catch(err => console.error('error:' + err));
-    }
+    
 
-    fetchData()
+  useEffect(() => {
+    fetchRestaurants()
   }, [])
+
+
+const fetchRestaurants = async () => {
+  await fetch(urlRestaurant, optionsRestaurant)
+  .then(res => res.json())
+  .then((json) => {console.log(json); setRestaurants(json.results.data)})
+  .catch(err => console.error('error:' + err));
+}
+
+const fetchCity = async () => {
+  await fetch(urlCity, optionsCity)
+ .then(res => res.json())
+ .then(json => console.log(json))
+ .catch(err => console.error('error:' + err));
+} 
+
 
   return (
     <>
@@ -44,10 +70,20 @@ function ListFunction() {
             )
         })
       }
-         <h1>Restaurants</h1>
+      <form>
+        <input type="text" name="city" value={city} onChange = {(e) => setCity(e.target.value)}/>
+        <button onClick = {(e) => {
+                    e.preventDefault();
+                    fetchCity();
+                    }
+                } > 
+        </button>
+      </form>
     </>
        
     )
 }
 
 export default ListFunction;
+
+

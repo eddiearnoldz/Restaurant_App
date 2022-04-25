@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 
 function ListFunction() {
-
-  const [ restaurants, setRestaurants] = useState()
+  const [ restaurants, setRestaurants] = useState([])
 
   useEffect(() => {
     const encodedParams = new URLSearchParams();
@@ -23,12 +22,15 @@ function ListFunction() {
       body: encodedParams
     };
     
-    fetch(url, options)
+    const fetchData = async () => {
+      await fetch(url, options)
       .then(res => res.json())
       .then((json) => {console.log(json); setRestaurants(json.results.data)})
       .catch(err => console.error('error:' + err));
-    }, [])
-console.log(restaurants)
+    }
+
+    fetchData()
+  }, [])
 
   return (
     <>

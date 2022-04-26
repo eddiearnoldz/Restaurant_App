@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 
 function ListFunction() {
+  let fetchedData = []
+  let position = 0
   const [ restaurants, setRestaurants] = useState([])
   const [city, setCity] = useState("")
   const [location, setLocation] = useState("186338")
   const [offset, setOffset] = useState(0)
-  let offsetNumber = 0
-  console.log(city)
+
   const encodedParamsRestaurant = new URLSearchParams();
     encodedParamsRestaurant.append("language", "en_US");
-    encodedParamsRestaurant.append("limit", "5");
+    encodedParamsRestaurant.append("limit", "100");
     encodedParamsRestaurant.append("location_id", `${location}`);
     encodedParamsRestaurant.append("currency", "USD");
     encodedParamsRestaurant.append("offset", `${offset}`);
@@ -41,17 +42,18 @@ function ListFunction() {
       body: encodedParamsCity
     };
     
-    
-
   useEffect(() => {
-    fetchRestaurants()
+    fetchRestaurants();
   }, [location])
 
 
 const fetchRestaurants = async () => {
   await fetch(urlRestaurant, optionsRestaurant)
   .then(res => res.json())
-  .then((json) => {console.log(json); setRestaurants(json.results.data)})
+  .then((json) => {
+    console.log(position)
+    setRestaurants(json.results.data.slice({position},5))
+  })
   .catch(err => console.error('error:' + err));
 }
 
@@ -63,13 +65,16 @@ const fetchCity = async () => {
     setLocation(json.results.data[0].result_object.location_id)})
  .catch(err => console.error('error:' + err));
 } 
-const nextFive = () =>{
-  let newOffset = offset
-  setOffset(newOffset += 5)
+
+const nextFive = () => { 
+  position += 5
   fetchRestaurants();
-  console.log(offsetNumber)
 }
 
+const findCheapest = () => {
+ const cheapos =  restaurants.filter( rest => (rest.price_level === '$'))
+ setRestaurants(cheapos)
+ }
 
   return (
     <>
@@ -79,6 +84,7 @@ const nextFive = () =>{
               <>
                 <p>{location.name}</p>
                 <p>{location.email}</p>
+                <p>{location.price_level}</p>
               </>
             )
         })
@@ -95,9 +101,15 @@ const nextFive = () =>{
       </form>
       <button onClick = {(e) => {
                     e.preventDefault();
-                    nextFive();
+                    nextFive()
                     }
                 } > Next 5 Restaurants
+        </button>
+        <button onClick = {(e) => {
+                    e.preventDefault();
+                    findCheapest();
+                    }
+                } > Show Cheapest Restaurant
         </button>
     </> 
   )
